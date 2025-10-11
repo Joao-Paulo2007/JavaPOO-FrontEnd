@@ -1,56 +1,70 @@
 package br.com.pdvfrontend.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
+@Component
 public class HttpClient {
 
-    private static final String BASE_URL = "http://localhost:8080/pessoas";
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
-    public static String get(String endpoint) throws IOException {
-        URL url = new URL(BASE_URL + endpoint);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        return readResponse(conn);
+    public HttpClient() {
+        this.restTemplate = new RestTemplate();
+        this.objectMapper = new ObjectMapper();
     }
 
-    public static String post(String endpoint, String json) throws IOException {
-        return sendWithBody("POST", endpoint, json);
-    }
-
-    public static String put(String endpoint, String json) throws IOException {
-        return sendWithBody("PUT", endpoint, json);
-    }
-
-    public static String delete(String endpoint) throws IOException {
-        URL url = new URL(BASE_URL + endpoint);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("DELETE");
-        return readResponse(conn);
-    }
-
-    private static String sendWithBody(String method, String endpoint, String json) throws IOException {
-        URL url = new URL(BASE_URL + endpoint);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(method);
-        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-        conn.setDoOutput(true);
-
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(json.getBytes("UTF-8"));
+    // GET genérico
+    public <T> T get(String url, Class<T> responseType) {
+        try {
+            ResponseEntity<T> response = restTemplate.getForEntity(url, responseType);
+            return response.getBody();
+        } catch (Exception e) {
+            System.err.println("Erro ao fazer GET em: " + url);
+            e.printStackTrace();
+            return null;
         }
-        return readResponse(conn);
     }
 
-    private static String readResponse(HttpURLConnection conn) throws IOException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) sb.append(line);
-            return sb.toString();
+    // POST genérico
+    public <T> T post(String url, Object requestBody, Class<T> responseType) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Object> entity = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<T> response = restTemplate.postForEntity(url, entity, responseType);
+            return response.getBody();
+        } catch (Exception e) {
+            System.err.println("Erro ao fazer POST em: " + url);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // PUT genérico
+    public void put(String url, Object requestBody) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Object> entity = new HttpEntity<>(requestBody, headers);
+            restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
+        } catch (Exception e) {
+            System.err.println("Erro ao fazer PUT em: " + url);
+            e.printStackTrace();
+        }
+    }
+
+    // DELETE genérico
+    public void delete(String url) {
+        try {
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            System.err.println("Erro ao fazer DELETE em: " + url);
+            e.printStackTrace();
         }
     }
 }
-

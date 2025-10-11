@@ -1,63 +1,66 @@
 package br.com.pdvfrontend.view;
 
-import br.com.pdvfrontend.util.HttpClient;
+import br.com.pdvfrontend.model.Pessoa;
+import br.com.pdvfrontend.service.PessoaService;
+
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
-public class PessoaForm extends JPanel {
+public class PessoaForm extends JFrame {
+    private JTextField txtNome;
+    private JTextField txtCtps;
+    private JTextField txtDataNascimento;
+    private JComboBox<String> comboTipo;
+    private PessoaService pessoaService;
+    private PessoaList pessoaList;
 
-    private JTextField txtNome = new JTextField(20);
-    private JTextField txtIdade = new JTextField(5);
-    private JButton btnSalvar = new JButton("Salvar");
-    private JButton btnCancelar = new JButton("Cancelar");
-    private PessoaList parent;
+    public PessoaForm(PessoaService service, PessoaList list) {
+        this.pessoaService = service;
+        this.pessoaList = list;
 
-    private String pessoaSelecionada;
+        setTitle("Cadastro de Pessoa");
+        setSize(400, 300);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new GridLayout(6, 2, 5, 5));
 
-    public PessoaForm(String pessoaSelecionada, PessoaList parent) {
-        this.parent = parent;
-        this.pessoaSelecionada = pessoaSelecionada;
+        add(new JLabel("Nome:"));
+        txtNome = new JTextField();
+        add(txtNome);
 
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.gridx = 0; gbc.gridy = 0;
-        add(new JLabel("Nome:"), gbc);
-        gbc.gridx = 1;
-        add(txtNome, gbc);
+        add(new JLabel("CTPS:"));
+        txtCtps = new JTextField();
+        add(txtCtps);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        add(new JLabel("Idade:"), gbc);
-        gbc.gridx = 1;
-        add(txtIdade, gbc);
+        add(new JLabel("Data de Nascimento:"));
+        txtDataNascimento = new JTextField();
+        add(txtDataNascimento);
 
-        JPanel botoes = new JPanel();
-        botoes.add(btnSalvar);
-        botoes.add(btnCancelar);
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-        add(botoes, gbc);
+        add(new JLabel("Tipo:"));
+        comboTipo = new JComboBox<>(new String[]{"Cliente", "Fornecedor"});
+        add(comboTipo);
+
+        JButton btnSalvar = new JButton("Salvar");
+        JButton btnCancelar = new JButton("Cancelar");
+
+        add(btnSalvar);
+        add(btnCancelar);
 
         btnSalvar.addActionListener(e -> salvarPessoa());
-        btnCancelar.addActionListener(e -> parent.voltarParaLista());
+        btnCancelar.addActionListener(e -> dispose());
     }
 
     private void salvarPessoa() {
-        try {
-            String nome = txtNome.getText();
-            String idade = txtIdade.getText();
-            String json = "{\"nome\":\"" + nome + "\",\"idade\":" + idade + "}";
+        Pessoa pessoa = new Pessoa(
+                null,
+                txtNome.getText(),
+                txtCtps.getText(),
+                txtDataNascimento.getText(),
+                (String) comboTipo.getSelectedItem()
+        );
 
-            if (pessoaSelecionada == null)
-                HttpClient.post("/", json);
-            else
-                HttpClient.put("/" + pessoaSelecionada, json);
-
-            JOptionPane.showMessageDialog(this, "Pessoa salva com sucesso!");
-            parent.voltarParaLista();
-
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Erro ao salvar: " + ex.getMessage());
-        }
+        pessoaService.addPessoa(pessoa);
+        pessoaList.atualizarTabela();
+        dispose();
     }
 }
