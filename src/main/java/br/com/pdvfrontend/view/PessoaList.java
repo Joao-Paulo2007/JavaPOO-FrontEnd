@@ -1,5 +1,6 @@
 package br.com.pdvfrontend.view;
 
+import br.com.pdvfrontend.api.pessoa.PessoaService;
 import br.com.pdvfrontend.model.Pessoa;
 import br.com.pdvfrontend.service.PessoaService;
 import javax.swing.*;

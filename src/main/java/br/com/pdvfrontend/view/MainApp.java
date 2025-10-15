@@ -1,6 +1,12 @@
 package br.com.pdvfrontend.view;
 
-import br.com.pdvfrontend.service.*;
+import br.com.pdvfrontend.api.acesso.AcessoService;
+import br.com.pdvfrontend.api.contato.ContatoService;
+import br.com.pdvfrontend.api.custo.CustoService;
+import br.com.pdvfrontend.api.estoque.EstoqueService;
+import br.com.pdvfrontend.api.pessoa.PessoaService;
+import br.com.pdvfrontend.api.preco.PrecoService;
+import br.com.pdvfrontend.api.produto.ProdutoService;
 
 import javax.swing.*;
 import java.awt.*;
