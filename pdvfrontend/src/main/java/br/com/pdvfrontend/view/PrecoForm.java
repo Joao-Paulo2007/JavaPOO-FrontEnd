@@ -1,7 +1,7 @@
 package br.com.pdvfrontend.view;
 
-import br.com.pdvfrontend.model.Preco;
 import com.br.pdvpostocombustivel.api.preco.PrecoService;
+import com.br.pdvpostocombustivel.api.preco.dto.PrecoRequest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,13 +58,15 @@ public class PrecoForm extends JFrame {
             Date dataAlteracao = dateFormat.parse(txtDataAlteracao.getText());
             Date horaAlteracao = timeFormat.parse(txtHoraAlteracao.getText());
 
-            Preco preco = new Preco(valor, dataAlteracao, horaAlteracao);
+            PrecoRequest precoRequest = new PrecoRequest(valor, dataAlteracao, horaAlteracao);
 
-            precoService.addPreco(preco);
+            precoService.create(precoRequest);
             precoList.atualizarTabela();
             dispose();
         } catch (NumberFormatException | ParseException ex) {
             JOptionPane.showMessageDialog(this, "Erro de formato de dados: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar preço: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

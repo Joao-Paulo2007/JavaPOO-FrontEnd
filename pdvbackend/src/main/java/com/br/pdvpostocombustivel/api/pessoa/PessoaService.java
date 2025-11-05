@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class PessoaService {
 
     // implementa a interface repository de pessoa
-    private final PessoaRepository repository;
+    private PessoaRepository repository;
 
     @Autowired
-    public PessoaService(PessoaRepository repository) {
+    public PessoaService() {
         this.repository = repository;
     }
 
@@ -117,6 +117,7 @@ public class PessoaService {
 
     private PessoaResponse toResponse(Pessoa p) {
         return new PessoaResponse(
+                p.getId(),
                 p.getNomeCompleto(),
                 p.getCpfCnpj(),
                 p.getNumeroCtps(),

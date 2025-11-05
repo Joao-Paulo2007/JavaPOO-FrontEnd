@@ -10,6 +10,14 @@ public class EstoqueRequest {
     private String loteFabricacao;
     private Date dataValidade;
 
+    public EstoqueRequest(BigDecimal quantidade, String localTanque, String localEndereco, String loteFabricacao, Date dataValidade) {
+        this.quantidade = quantidade;
+        this.localTanque = localTanque;
+        this.localEndereco = localEndereco;
+        this.loteFabricacao = loteFabricacao;
+        this.dataValidade = dataValidade;
+    }
+
     // Getters and Setters
     public BigDecimal getQuantidade() {
         return quantidade;

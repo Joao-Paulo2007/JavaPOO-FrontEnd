@@ -1,7 +1,7 @@
 package br.com.pdvfrontend.view;
 
-import br.com.pdvfrontend.model.Custo;
 import com.br.pdvpostocombustivel.api.custo.CustoService;
+import com.br.pdvpostocombustivel.api.custo.dto.CustoRequest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,21 +65,23 @@ public class CustoForm extends JFrame {
 
     private void salvarCusto() {
         try {
-            double imposto = Double.parseDouble(txtImposto.getText());
-            double frete = Double.parseDouble(txtFrete.getText());
-            double custoVariavel = Double.parseDouble(txtCustoVariavel.getText());
-            double custoFixo = Double.parseDouble(txtCustoFixo.getText());
-            double margemLucro = Double.parseDouble(txtMargemLucro.getText());
+            Double imposto = Double.parseDouble(txtImposto.getText());
+            Double frete = Double.parseDouble(txtFrete.getText());
+            Double custoVariavel = Double.parseDouble(txtCustoVariavel.getText());
+            Double custoFixo = Double.parseDouble(txtCustoFixo.getText());
+            Double margemLucro = Double.parseDouble(txtMargemLucro.getText());
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             Date dataProcessamento = dateFormat.parse(txtDataProcessamento.getText());
 
-            Custo custo = new Custo(imposto, frete, custoVariavel, custoFixo, margemLucro, dataProcessamento);
+            CustoRequest custoRequest = new CustoRequest(imposto, frete, custoVariavel, custoFixo, margemLucro, dataProcessamento);
 
-            custoService.addCusto(custo);
+            custoService.create(custoRequest);
             custoList.atualizarTabela();
             dispose();
         } catch (NumberFormatException | ParseException ex) {
             JOptionPane.showMessageDialog(this, "Erro de formato de dados: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar custo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

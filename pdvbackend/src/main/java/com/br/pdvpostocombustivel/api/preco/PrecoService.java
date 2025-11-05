@@ -14,9 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PrecoService {
 
-    private final PrecoRepository repository;
+    private PrecoRepository repository;
 
-    public PrecoService(PrecoRepository repository) {
+    public PrecoService() {
         this.repository = repository;
     }
 

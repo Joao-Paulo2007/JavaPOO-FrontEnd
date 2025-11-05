@@ -1,26 +1,37 @@
 package br.com.pdvfrontend.view;
 
 import com.br.pdvpostocombustivel.api.pessoa.PessoaService;
-import br.com.pdvfrontend.model.Pessoa;
-import com.br.pdvpostocombustivel.api.pessoa.PessoaService;
+import com.br.pdvpostocombustivel.api.pessoa.dto.PessoaRequest;
+import com.br.pdvpostocombustivel.api.pessoa.dto.PessoaResponse;
+import com.br.pdvpostocombustivel.enums.TipoPessoa;
+import org.springframework.data.domain.Sort;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PessoaList extends JFrame {
     private final PessoaService pessoaService;
     private JTable table;
+    private List<PessoaResponse> currentPessoas;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public PessoaList(PessoaService service) {
         this.pessoaService = service;
+        this.currentPessoas = new ArrayList<>();
         initComponents();
+        atualizarTabela();
     }
 
     private void initComponents() {
         setTitle(" Posto de Combustível - Gestão de Pessoas");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(1000, 550);
         setLocationRelativeTo(null);
 
@@ -44,7 +55,6 @@ public class PessoaList extends JFrame {
         ));
         mainPanel.add(header, BorderLayout.NORTH);
 
-        // 📋 Painel central com leve sombra
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBackground(branco);
         tablePanel.setBorder(BorderFactory.createCompoundBorder(
@@ -83,12 +93,9 @@ public class PessoaList extends JFrame {
 
         add(mainPanel);
 
-        // Ações
         btnAdicionar.addActionListener(this::adicionarPessoa);
         btnRemover.addActionListener(this::removerPessoa);
         btnAtualizar.addActionListener(e -> atualizarTabela());
-
-        atualizarTabela();
     }
 
     private JButton criarBotao(String texto, Color fundo, Color textoCor) {
@@ -106,38 +113,38 @@ public class PessoaList extends JFrame {
     }
 
     private void adicionarPessoa(ActionEvent e) {
-        JTextField nomeField = new JTextField();
-        JTextField cpfField = new JTextField();
-        JTextField dataField = new JTextField();
-        JTextField tipoField = new JTextField();
-        String[] roles = {"USER", "ADMIN"};
-        JComboBox<String> roleBox = new JComboBox<>(roles);
+        JTextField nomeCompletoField = new JTextField();
+        JTextField cpfCnpjField = new JTextField();
+        JTextField numeroCtpsField = new JTextField();
+        JTextField dataNascimentoField = new JTextField();
+        JComboBox<TipoPessoa> tipoPessoaBox = new JComboBox<>(TipoPessoa.values());
 
         JPanel form = new JPanel(new GridLayout(5, 2, 10, 10));
-        form.add(new JLabel("Nome:"));
-        form.add(nomeField);
-        form.add(new JLabel("CPF:"));
-        form.add(cpfField);
-        form.add(new JLabel("Data de Nascimento (YYYY-MM-DD):"));
-        form.add(dataField);
-        form.add(new JLabel("Tipo (Física/Jurídica):"));
-        form.add(tipoField);
-        form.add(new JLabel("Função:"));
-        form.add(roleBox);
+        form.add(new JLabel("Nome Completo:"));
+        form.add(nomeCompletoField);
+        form.add(new JLabel("CPF/CNPJ:"));
+        form.add(cpfCnpjField);
+        form.add(new JLabel("Número CTPS:"));
+        form.add(numeroCtpsField);
+        form.add(new JLabel("Data de Nascimento (dd/MM/yyyy):"));
+        form.add(dataNascimentoField);
+        form.add(new JLabel("Tipo de Pessoa:"));
+        form.add(tipoPessoaBox);
 
         int result = JOptionPane.showConfirmDialog(this, form, "Nova Pessoa", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            String nome = nomeField.getText();
-            String cpf = cpfField.getText();
-            String dataNasc = dataField.getText();
-            String tipo = tipoField.getText();
-            String role = (String) roleBox.getSelectedItem();
+            try {
+                String nomeCompleto = nomeCompletoField.getText();
+                String cpfCnpj = cpfCnpjField.getText();
+                Long numeroCtps = Long.parseLong(numeroCtpsField.getText());
+                LocalDate dataNascimento = LocalDate.parse(dataNascimentoField.getText(), dateFormatter);
+                TipoPessoa tipoPessoa = (TipoPessoa) tipoPessoaBox.getSelectedItem();
 
-            if (!nome.isEmpty() && !cpf.isEmpty() && !dataNasc.isEmpty() && !tipo.isEmpty()) {
-                pessoaService.addPessoa(new Pessoa(nome, cpf, dataNasc, tipo, role));
+                PessoaRequest newPessoa = new PessoaRequest(nomeCompleto, cpfCnpj, numeroCtps, dataNascimento, tipoPessoa);
+                pessoaService.create(newPessoa);
                 atualizarTabela();
-            } else {
-                JOptionPane.showMessageDialog(this, "Preencha todos os campos!", "Aviso", JOptionPane.WARNING_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao adicionar pessoa: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -145,27 +152,44 @@ public class PessoaList extends JFrame {
     private void removerPessoa(ActionEvent e) {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
-            pessoaService.removePessoa(selectedRow);
-            atualizarTabela();
+            try {
+                PessoaResponse selectedPessoa = currentPessoas.get(selectedRow);
+                pessoaService.delete(selectedPessoa.getId());
+                atualizarTabela();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao remover pessoa: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Selecione uma pessoa para remover!");
         }
     }
 
     void atualizarTabela() {
-        String[] colunas = {"Nome", "CPF", "Data de Nascimento", "Tipo", "Função"};
+        String[] colunas = {"ID", "Nome Completo", "CPF/CNPJ", "Nº CTPS", "Data de Nascimento"};
         DefaultTableModel model = new DefaultTableModel(colunas, 0);
 
-        for (Pessoa p : pessoaService.listPessoas()) {
-            model.addRow(new Object[]{
-                    p.getNome(),
-                    p.getCpf(),
-                    p.getDataNascimento(),
-                    p.getTipo(),
-                    p.getRole()
-            });
-        }
+        try {
+            this.currentPessoas = pessoaService.list(0, 1000, "id", Sort.Direction.ASC).getContent();
 
-        table.setModel(model);
+            for (PessoaResponse p : currentPessoas) {
+                model.addRow(new Object[]{
+                        p.getId(),
+                        p.getNomeCompleto(),
+                        p.getCpfCnpj(),
+                        p.getNumeroCtps(),
+                        p.getDataNascimento().format(dateFormatter)
+                });
+            }
+
+            table.setModel(model);
+            table.getColumnModel().getColumn(0).setMinWidth(0);
+            table.getColumnModel().getColumn(0).setMaxWidth(0);
+            table.getColumnModel().getColumn(0).setWidth(0);
+
+        } catch (Exception e) {
+            this.currentPessoas = new ArrayList<>();
+            table.setModel(model);
+            JOptionPane.showMessageDialog(this, "Erro ao carregar pessoas: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

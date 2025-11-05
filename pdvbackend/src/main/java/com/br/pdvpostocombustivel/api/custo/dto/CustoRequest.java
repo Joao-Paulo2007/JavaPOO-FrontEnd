@@ -10,6 +10,15 @@ public class CustoRequest {
     private Double margemLucro;
     private Date dataProcessamento;
 
+    public CustoRequest(Double imposto, Double frete, Double custoVariavel, Double custoFixo, Double margemLucro, Date dataProcessamento) {
+        this.imposto = imposto;
+        this.frete = frete;
+        this.custoVariavel = custoVariavel;
+        this.custoFixo = custoFixo;
+        this.margemLucro = margemLucro;
+        this.dataProcessamento = dataProcessamento;
+    }
+
     public Double getImposto() {
         return imposto;
     }

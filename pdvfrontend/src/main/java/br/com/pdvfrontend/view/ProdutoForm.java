@@ -1,7 +1,7 @@
 package br.com.pdvfrontend.view;
 
-import br.com.pdvfrontend.model.Produto;
 import com.br.pdvpostocombustivel.api.produto.ProdutoService;
+import com.br.pdvpostocombustivel.api.produto.dto.ProdutoRequest;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -118,10 +118,14 @@ public class ProdutoForm extends JFrame {
             return;
         }
 
-        Produto produto = new Produto(nome, referencia, fornecedor, categoria, marca);
+        ProdutoRequest produtoRequest = new ProdutoRequest(nome, referencia, fornecedor, categoria, marca);
 
-        produtoService.addProduto(produto);
-        produtoList.atualizarTabela();
-        dispose();
+        try {
+            produtoService.create(produtoRequest);
+            produtoList.atualizarTabela();
+            dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar produto: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

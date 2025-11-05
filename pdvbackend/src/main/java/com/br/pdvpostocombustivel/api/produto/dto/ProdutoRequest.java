@@ -7,6 +7,14 @@ public class ProdutoRequest {
     private String categoria;
     private String marca;
 
+    public ProdutoRequest(String nome, String referencia, String fornecedor, String categoria, String marca) {
+        this.nome = nome;
+        this.referencia = referencia;
+        this.fornecedor = fornecedor;
+        this.categoria = categoria;
+        this.marca = marca;
+    }
+
     // Getters and Setters
     public String getNome() {
         return nome;

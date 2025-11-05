@@ -1,23 +1,31 @@
 package br.com.pdvfrontend.view;
 
 import com.br.pdvpostocombustivel.api.estoque.EstoqueService;
-import br.com.pdvfrontend.model.Estoque;
+import com.br.pdvpostocombustivel.api.estoque.dto.EstoqueRequest;
+import com.br.pdvpostocombustivel.api.estoque.dto.EstoqueResponse;
+import org.springframework.data.domain.Sort;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.text.SimpleDateFormat;
-import java.util.List;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class EstoqueList extends JFrame {
     private final EstoqueService estoqueService;
     private JTable table;
+    private List<EstoqueResponse> currentEstoques;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     public EstoqueList(EstoqueService service) {
         this.estoqueService = service;
+        this.currentEstoques = new ArrayList<>();
         initComponents();
         atualizarTabela();
     }
@@ -28,7 +36,7 @@ public class EstoqueList extends JFrame {
         setSize(1200, 550);
         setLocationRelativeTo(null);
 
-        Color marrom = new Color(139, 69, 19); // Cor de destaque para Estoque
+        Color marrom = new Color(139, 69, 19);
         Color preto = new Color(25, 25, 25);
         Color branco = Color.WHITE;
         Color cinzaFundo = new Color(240, 240, 240);
@@ -131,12 +139,15 @@ public class EstoqueList extends JFrame {
                 String localTanque = localTanqueField.getText();
                 String localEndereco = localEnderecoField.getText();
                 String loteFabricacao = loteFabricacaoField.getText();
-                java.util.Date dataValidade = dateFormat.parse(dataValidadeField.getText());
+                Date dataValidade = dateFormat.parse(dataValidadeField.getText());
 
-                estoqueService.addEstoque(new Estoque(quantidade, localTanque, localEndereco, loteFabricacao, dataValidade));
+                EstoqueRequest newEstoque = new EstoqueRequest(quantidade, localTanque, localEndereco, loteFabricacao, dataValidade);
+                estoqueService.create(newEstoque);
                 atualizarTabela();
-            } catch (Exception ex) {
+            } catch (NumberFormatException | ParseException ex) {
                 JOptionPane.showMessageDialog(this, "Erro nos dados de entrada. Verifique os formatos (números e data - dd/MM/yyyy).", "Erro", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao adicionar item de estoque: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -144,28 +155,45 @@ public class EstoqueList extends JFrame {
     private void removerEstoque(ActionEvent e) {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
-            estoqueService.removeEstoque(selectedRow);
-            atualizarTabela();
+            try {
+                EstoqueResponse selectedEstoque = currentEstoques.get(selectedRow);
+                estoqueService.delete(selectedEstoque.getId());
+                atualizarTabela();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao remover item de estoque: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Selecione um item de estoque para remover!");
         }
     }
 
     public void atualizarTabela() {
-        String[] colunas = {"Quantidade", "Local Tanque", "Local Endereço", "Lote Fabricação", "Data Validade"};
+        String[] colunas = {"ID", "Quantidade", "Local Tanque", "Local Endereço", "Lote Fabricação", "Data Validade"};
         DefaultTableModel model = new DefaultTableModel(colunas, 0);
 
-        List<Estoque> estoques = estoqueService.listEstoques();
-        for (Estoque est : estoques) {
-            model.addRow(new Object[]{
-                    est.getQuantidade().toString(),
-                    est.getLocalTanque(),
-                    est.getLocalEndereco(),
-                    est.getLoteFabricacao(),
-                    dateFormat.format(est.getDataValidade())
-            });
-        }
+        try {
+            this.currentEstoques = estoqueService.list(0, 1000, "id", Sort.Direction.ASC).getContent();
 
-        table.setModel(model);
+            for (EstoqueResponse est : currentEstoques) {
+                model.addRow(new Object[]{
+                        est.getId(),
+                        est.getQuantidade().toString(),
+                        est.getLocalTanque(),
+                        est.getLocalEndereco(),
+                        est.getLoteFabricacao(),
+                        dateFormat.format(est.getDataValidade())
+                });
+            }
+
+            table.setModel(model);
+            table.getColumnModel().getColumn(0).setMinWidth(0);
+            table.getColumnModel().getColumn(0).setMaxWidth(0);
+            table.getColumnModel().getColumn(0).setWidth(0);
+
+        } catch (Exception e) {
+            this.currentEstoques = new ArrayList<>();
+            table.setModel(model);
+            JOptionPane.showMessageDialog(this, "Erro ao carregar estoque: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

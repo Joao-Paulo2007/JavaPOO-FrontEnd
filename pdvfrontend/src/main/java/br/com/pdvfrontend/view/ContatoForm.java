@@ -1,7 +1,7 @@
 package br.com.pdvfrontend.view;
 
-import br.com.pdvfrontend.model.Contato;
 import com.br.pdvpostocombustivel.api.contato.ContatoService;
+import com.br.pdvpostocombustivel.api.contato.dto.ContatoRequest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,14 +46,23 @@ public class ContatoForm extends JFrame {
     }
 
     private void salvarContato() {
-        Contato contato = new Contato(
-                txtTelefone.getText(),
-                txtEmail.getText(),
-                txtEndereco.getText()
-        );
+        String telefone = txtTelefone.getText();
+        String email = txtEmail.getText();
+        String endereco = txtEndereco.getText();
 
-        contatoService.addContato(contato);
-        contatoList.atualizarTabela();
-        dispose();
+        if (telefone.isEmpty() || email.isEmpty() || endereco.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Preencha todos os campos!", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        ContatoRequest contatoRequest = new ContatoRequest(telefone, email, endereco);
+
+        try {
+            contatoService.create(contatoRequest);
+            contatoList.atualizarTabela();
+            dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar contato: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

@@ -1,24 +1,32 @@
 package br.com.pdvfrontend.view;
 
 import com.br.pdvpostocombustivel.api.preco.PrecoService;
-import br.com.pdvfrontend.model.Preco;
+import com.br.pdvpostocombustivel.api.preco.dto.PrecoRequest;
+import com.br.pdvpostocombustivel.api.preco.dto.PrecoResponse;
+import org.springframework.data.domain.Sort;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.text.SimpleDateFormat;
-import java.util.List;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class PrecoList extends JFrame {
     private final PrecoService precoService;
     private JTable table;
+    private List<PrecoResponse> currentPrecos;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
     public PrecoList(PrecoService service) {
         this.precoService = service;
+        this.currentPrecos = new ArrayList<>();
         initComponents();
         atualizarTabela();
     }
@@ -123,13 +131,16 @@ public class PrecoList extends JFrame {
         if (result == JOptionPane.OK_OPTION) {
             try {
                 BigDecimal valor = new BigDecimal(valorField.getText());
-                java.util.Date dataAlteracao = dateFormat.parse(dataAlteracaoField.getText());
-                java.util.Date horaAlteracao = timeFormat.parse(horaAlteracaoField.getText());
+                Date dataAlteracao = dateFormat.parse(dataAlteracaoField.getText());
+                Date horaAlteracao = timeFormat.parse(horaAlteracaoField.getText());
 
-                precoService.addPreco(new Preco(valor, dataAlteracao, horaAlteracao));
+                PrecoRequest newPreco = new PrecoRequest(valor, dataAlteracao, horaAlteracao);
+                precoService.create(newPreco);
                 atualizarTabela();
-            } catch (Exception ex) {
+            } catch (NumberFormatException | ParseException ex) {
                 JOptionPane.showMessageDialog(this, "Erro nos dados de entrada. Verifique os formatos (números, data - dd/MM/yyyy e hora - HH:mm:ss).", "Erro", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao adicionar preço: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -137,26 +148,43 @@ public class PrecoList extends JFrame {
     private void removerPreco(ActionEvent e) {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
-            precoService.removePreco(selectedRow);
-            atualizarTabela();
+            try {
+                PrecoResponse selectedPreco = currentPrecos.get(selectedRow);
+                precoService.delete(selectedPreco.getId());
+                atualizarTabela();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao remover preço: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Selecione um preço para remover!");
         }
     }
 
     public void atualizarTabela() {
-        String[] colunas = {"Valor (R$)", "Data Alteração", "Hora Alteração"};
+        String[] colunas = {"ID", "Valor (R$)", "Data Alteração", "Hora Alteração"};
         DefaultTableModel model = new DefaultTableModel(colunas, 0);
 
-        List<Preco> precos = precoService.listPrecos();
-        for (Preco p : precos) {
-            model.addRow(new Object[]{
-                    String.format("R$ %.2f", p.getValor()),
-                    dateFormat.format(p.getDataAlteracao()),
-                    timeFormat.format(p.getHoraAlteracao())
-            });
-        }
+        try {
+            this.currentPrecos = precoService.list(0, 1000, "id", Sort.Direction.ASC).getContent();
 
-        table.setModel(model);
+            for (PrecoResponse p : currentPrecos) {
+                model.addRow(new Object[]{
+                        p.getId(),
+                        String.format("R$ %.2f", p.getValor()),
+                        dateFormat.format(p.getDataAlteracao()),
+                        timeFormat.format(p.getHoraAlteracao())
+                });
+            }
+
+            table.setModel(model);
+            table.getColumnModel().getColumn(0).setMinWidth(0);
+            table.getColumnModel().getColumn(0).setMaxWidth(0);
+            table.getColumnModel().getColumn(0).setWidth(0);
+
+        } catch (Exception e) {
+            this.currentPrecos = new ArrayList<>();
+            table.setModel(model);
+            JOptionPane.showMessageDialog(this, "Erro ao carregar preços: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

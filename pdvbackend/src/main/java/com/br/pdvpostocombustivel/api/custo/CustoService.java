@@ -14,9 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CustoService {
 
-    private final CustoRepository repository;
+    private CustoRepository repository;
 
-    public CustoService(CustoRepository repository) {
+    public CustoService() {
         this.repository = repository;
     }
 

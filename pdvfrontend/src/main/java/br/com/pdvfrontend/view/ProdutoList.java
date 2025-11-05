@@ -1,20 +1,26 @@
 package br.com.pdvfrontend.view;
 
 import com.br.pdvpostocombustivel.api.produto.ProdutoService;
-import br.com.pdvfrontend.model.Produto;
+import com.br.pdvpostocombustivel.api.produto.dto.ProdutoRequest;
+import com.br.pdvpostocombustivel.api.produto.dto.ProdutoResponse;
+import org.springframework.data.domain.Sort;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProdutoList extends JFrame {
     private final ProdutoService produtoService;
     private JTable table;
+    private List<ProdutoResponse> currentProdutos;
 
     public ProdutoList(ProdutoService service) {
         this.produtoService = service;
+        this.currentProdutos = new ArrayList<>();
         initComponents();
         atualizarTabela();
     }
@@ -25,7 +31,7 @@ public class ProdutoList extends JFrame {
         setSize(1000, 550);
         setLocationRelativeTo(null);
 
-        Color roxo = new Color(128, 0, 128); // Cor de destaque para Produto
+        Color roxo = new Color(128, 0, 128);
         Color preto = new Color(25, 25, 25);
         Color branco = Color.WHITE;
         Color cinzaFundo = new Color(240, 240, 240);
@@ -103,35 +109,84 @@ public class ProdutoList extends JFrame {
     }
 
     private void adicionarProduto(ActionEvent e) {
-        ProdutoForm form = new ProdutoForm(produtoService, this);
-        form.setVisible(true);
+        JTextField nomeField = new JTextField();
+        JTextField referenciaField = new JTextField();
+        JTextField fornecedorField = new JTextField();
+        JTextField categoriaField = new JTextField();
+        JTextField marcaField = new JTextField();
+
+        JPanel form = new JPanel(new GridLayout(5, 2, 10, 10));
+        form.add(new JLabel("Nome:"));
+        form.add(nomeField);
+        form.add(new JLabel("Referência:"));
+        form.add(referenciaField);
+        form.add(new JLabel("Fornecedor:"));
+        form.add(fornecedorField);
+        form.add(new JLabel("Categoria:"));
+        form.add(categoriaField);
+        form.add(new JLabel("Marca:"));
+        form.add(marcaField);
+
+        int result = JOptionPane.showConfirmDialog(this, form, "Novo Produto", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                String nome = nomeField.getText();
+                String referencia = referenciaField.getText();
+                String fornecedor = fornecedorField.getText();
+                String categoria = categoriaField.getText();
+                String marca = marcaField.getText();
+
+                ProdutoRequest newProduto = new ProdutoRequest(nome, referencia, fornecedor, categoria, marca);
+                produtoService.create(newProduto);
+                atualizarTabela();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao adicionar produto: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void removerProduto(ActionEvent e) {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
-            produtoService.removeProduto(selectedRow);
-            atualizarTabela();
+            try {
+                ProdutoResponse selectedProduto = currentProdutos.get(selectedRow);
+                produtoService.delete(selectedProduto.getId());
+                atualizarTabela();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao remover produto: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Selecione um produto para remover!");
         }
     }
 
     public void atualizarTabela() {
-        String[] colunas = {"Nome", "Referência", "Fornecedor", "Categoria", "Marca"};
+        String[] colunas = {"ID", "Nome", "Referência", "Fornecedor", "Categoria", "Marca"};
         DefaultTableModel model = new DefaultTableModel(colunas, 0);
 
-        List<Produto> produtos = produtoService.listProdutos();
-        for (Produto p : produtos) {
-            model.addRow(new Object[]{
-                    p.getNome(),
-                    p.getReferencia(),
-                    p.getFornecedor(),
-                    p.getCategoria(),
-                    p.getMarca()
-            });
-        }
+        try {
+            this.currentProdutos = produtoService.list(0, 1000, "id", Sort.Direction.ASC).getContent();
 
-        table.setModel(model);
+            for (ProdutoResponse p : currentProdutos) {
+                model.addRow(new Object[]{
+                        p.getId(),
+                        p.getNome(),
+                        p.getReferencia(),
+                        p.getFornecedor(),
+                        p.getCategoria(),
+                        p.getMarca()
+                });
+            }
+
+            table.setModel(model);
+            table.getColumnModel().getColumn(0).setMinWidth(0);
+            table.getColumnModel().getColumn(0).setMaxWidth(0);
+            table.getColumnModel().getColumn(0).setWidth(0);
+
+        } catch (Exception e) {
+            this.currentProdutos = new ArrayList<>();
+            table.setModel(model);
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

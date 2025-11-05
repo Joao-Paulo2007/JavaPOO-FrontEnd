@@ -10,13 +10,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class EstoqueService {
 
-    private final EstoqueRepository repository;
+    private EstoqueRepository repository;
 
-    public EstoqueService(EstoqueRepository repository) {
+    public EstoqueService() {
         this.repository = repository;
     }
 

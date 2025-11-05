@@ -14,9 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ContatoService {
 
-    private final ContatoRepository repository;
+    private ContatoRepository repository;
 
-    public ContatoService(ContatoRepository repository) {
+    public ContatoService() {
+
         this.repository = repository;
     }
 

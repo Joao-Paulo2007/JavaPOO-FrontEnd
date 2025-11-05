@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 
 public class PessoaResponse {
+    private Long id;
     private String nomeCompleto;
     private String cpfCnpj;
     private Long numeroCtps;
@@ -14,11 +15,20 @@ public class PessoaResponse {
     public PessoaResponse() {
     }
 
-    public PessoaResponse(String nomeCompleto, String cpfCnpj, Long numeroCtps, LocalDate dataNascimento) {
+    public PessoaResponse(Long id, String nomeCompleto, String cpfCnpj, Long numeroCtps, LocalDate dataNascimento) {
+        this.id = id;
         this.nomeCompleto = nomeCompleto;
         this.cpfCnpj = cpfCnpj;
         this.numeroCtps = numeroCtps;
         this.dataNascimento = dataNascimento;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNomeCompleto() {

@@ -4,6 +4,11 @@ public class AcessoRequest {
     private String usuario;
     private String senha;
 
+    public AcessoRequest(String usuario, String senha) {
+        this.usuario = usuario;
+        this.senha = senha;
+    }
+
     // Getters and Setters
     public String getUsuario() {
         return usuario;

@@ -1,7 +1,7 @@
 package br.com.pdvfrontend.view;
 
-import br.com.pdvfrontend.model.Estoque;
 import com.br.pdvpostocombustivel.api.estoque.EstoqueService;
+import com.br.pdvpostocombustivel.api.estoque.dto.EstoqueRequest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,22 +62,21 @@ public class EstoqueForm extends JFrame {
     private void salvarEstoque() {
         try {
             BigDecimal quantidade = new BigDecimal(txtQuantidade.getText());
+            String localTanque = txtLocalTanque.getText();
+            String localEndereco = txtLocalEndereco.getText();
+            String loteFabricacao = txtLoteFabricacao.getText();
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             Date dataValidade = dateFormat.parse(txtDataValidade.getText());
 
-            Estoque estoque = new Estoque(
-                    quantidade,
-                    txtLocalTanque.getText(),
-                    txtLocalEndereco.getText(),
-                    txtLoteFabricacao.getText(),
-                    dataValidade
-            );
+            EstoqueRequest estoqueRequest = new EstoqueRequest(quantidade, localTanque, localEndereco, loteFabricacao, dataValidade);
 
-            estoqueService.addEstoque(estoque);
+            estoqueService.create(estoqueRequest);
             estoqueList.atualizarTabela();
             dispose();
         } catch (NumberFormatException | ParseException ex) {
             JOptionPane.showMessageDialog(this, "Erro de formato de dados: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar estoque: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

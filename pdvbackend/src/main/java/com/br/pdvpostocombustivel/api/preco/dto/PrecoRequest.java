@@ -8,6 +8,12 @@ public class PrecoRequest {
     private Date dataAlteracao;
     private Date horaAlteracao;
 
+    public PrecoRequest(BigDecimal valor, Date dataAlteracao, Date horaAlteracao) {
+        this.valor = valor;
+        this.dataAlteracao = dataAlteracao;
+        this.horaAlteracao = horaAlteracao;
+    }
+
     // Getters and Setters
     public BigDecimal getValor() {
         return valor;

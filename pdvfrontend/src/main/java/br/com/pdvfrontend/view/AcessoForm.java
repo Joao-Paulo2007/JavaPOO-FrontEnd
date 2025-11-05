@@ -1,7 +1,7 @@
 package br.com.pdvfrontend.view;
 
-import br.com.pdvfrontend.model.Acesso;
 import com.br.pdvpostocombustivel.api.acesso.AcessoService;
+import com.br.pdvpostocombustivel.api.acesso.dto.AcessoRequest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,13 +41,22 @@ public class AcessoForm extends JFrame {
     }
 
     private void salvarAcesso() {
-        Acesso acesso = new Acesso(
-                txtUsuario.getText(),
-                new String(txtSenha.getPassword())
-        );
+        String usuario = txtUsuario.getText();
+        String senha = new String(txtSenha.getPassword());
 
-        acessoService.addAcesso(acesso);
-        acessoList.atualizarTabela();
-        dispose();
+        if (usuario.isEmpty() || senha.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Preencha todos os campos!", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        AcessoRequest acessoRequest = new AcessoRequest(usuario, senha);
+
+        try {
+            acessoService.create(acessoRequest);
+            acessoList.atualizarTabela();
+            dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar acesso: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

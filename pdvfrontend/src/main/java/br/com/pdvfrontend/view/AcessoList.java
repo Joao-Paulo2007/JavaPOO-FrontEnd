@@ -1,20 +1,26 @@
 package br.com.pdvfrontend.view;
 
 import com.br.pdvpostocombustivel.api.acesso.AcessoService;
-import br.com.pdvfrontend.model.Acesso;
+import com.br.pdvpostocombustivel.api.acesso.dto.AcessoRequest;
+import com.br.pdvpostocombustivel.api.acesso.dto.AcessoResponse;
+import org.springframework.data.domain.Sort;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AcessoList extends JFrame {
     private final AcessoService acessoService;
     private JTable table;
+    private List<AcessoResponse> currentAcessos;
 
     public AcessoList(AcessoService service) {
         this.acessoService = service;
+        this.currentAcessos = new ArrayList<>();
         initComponents();
         atualizarTabela();
     }
@@ -25,7 +31,7 @@ public class AcessoList extends JFrame {
         setSize(800, 550);
         setLocationRelativeTo(null);
 
-        Color azul = new Color(0, 100, 200); // Cor de destaque para Acesso
+        Color azul = new Color(0, 100, 200);
         Color preto = new Color(25, 25, 25);
         Color branco = Color.WHITE;
         Color cinzaFundo = new Color(240, 240, 240);
@@ -45,7 +51,6 @@ public class AcessoList extends JFrame {
         ));
         mainPanel.add(header, BorderLayout.NORTH);
 
-        // Painel central com leve sombra
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBackground(branco);
         tablePanel.setBorder(BorderFactory.createCompoundBorder(
@@ -84,7 +89,6 @@ public class AcessoList extends JFrame {
 
         add(mainPanel);
 
-        // Ações
         btnAdicionar.addActionListener(this::adicionarAcesso);
         btnRemover.addActionListener(this::removerAcesso);
         btnAtualizar.addActionListener(e -> atualizarTabela());
@@ -120,9 +124,13 @@ public class AcessoList extends JFrame {
             String senha = new String(senhaField.getPassword());
 
             if (!usuario.isEmpty() && !senha.isEmpty()) {
-                // AcessoService.addAcesso espera um objeto Acesso
-                acessoService.addAcesso(new Acesso(usuario, senha));
-                atualizarTabela();
+                AcessoRequest newAcesso = new AcessoRequest(usuario, senha);
+                try {
+                    acessoService.create(newAcesso);
+                    atualizarTabela();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Erro ao adicionar acesso: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Preencha todos os campos!", "Aviso", JOptionPane.WARNING_MESSAGE);
             }
@@ -132,25 +140,41 @@ public class AcessoList extends JFrame {
     private void removerAcesso(ActionEvent e) {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
-            acessoService.removeAcesso(selectedRow);
-            atualizarTabela();
+            try {
+                AcessoResponse selectedAcesso = currentAcessos.get(selectedRow);
+                acessoService.delete(selectedAcesso.getId());
+                atualizarTabela();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao remover acesso: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Selecione um acesso para remover!");
         }
     }
 
     public void atualizarTabela() {
-        String[] colunas = {"Usuário", "Senha"};
+        String[] colunas = {"ID", "Usuário"};
         DefaultTableModel model = new DefaultTableModel(colunas, 0);
 
-        List<Acesso> acessos = acessoService.listAcessos();
-        for (Acesso a : acessos) {
-            model.addRow(new Object[]{
-                    a.getUsuario(),
-                    "********"
-            });
-        }
+        try {
+            this.currentAcessos = acessoService.list(0, 1000, "id", Sort.Direction.ASC).getContent();
 
-        table.setModel(model);
+            for (AcessoResponse a : currentAcessos) {
+                model.addRow(new Object[]{
+                        a.getId(),
+                        a.getUsuario()
+                });
+            }
+
+            table.setModel(model);
+            table.getColumnModel().getColumn(0).setMinWidth(0);
+            table.getColumnModel().getColumn(0).setMaxWidth(0);
+            table.getColumnModel().getColumn(0).setWidth(0);
+
+        } catch (Exception e) {
+            this.currentAcessos = new ArrayList<>();
+            table.setModel(model);
+            JOptionPane.showMessageDialog(this, "Erro ao carregar acessos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

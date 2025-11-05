@@ -15,9 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AcessoService {
 
-    private final AcessoRepository repository;
+    private AcessoRepository repository;
 
-    public AcessoService(AcessoRepository repository) {
+    public AcessoService() {
         this.repository = repository;
     }
 
