@@ -1,0 +1,63 @@
+===================================
+  PDV POSTO DE COMBUSTÍVEL v2.0
+===================================
+
+🎯 COMECE AQUI:
+
+1. Leia o arquivo: INSTALACAO.md
+   (Contém o passo a passo completo)
+
+2. Ou siga o resumo rápido abaixo:
+
+===================================
+📋 RESUMO RÁPIDO:
+===================================
+
+1. Instale:
+   - Java JDK 17+
+   - Maven 3.6+
+   - PostgreSQL 12+
+
+2. Crie o banco:
+   - Nome: pdv_posto
+
+3. Configure:
+   - Edite: backend\src\main\resources\application.properties
+   - Altere a senha do PostgreSQL
+
+4. Execute Backend:
+   - cd backend
+   - mvn spring-boot:run
+
+5. Execute Frontend (nova janela):
+   - cd frontend
+   - mvn clean compile exec:java
+
+6. Primeiro Acesso:
+   - Cadastre um admin
+   - Faça login
+   - Use o sistema!
+
+===================================
+📞 PROBLEMAS?
+===================================
+
+Veja o arquivo INSTALACAO.md para:
+- Guia completo passo a passo
+- Resolução de problemas
+- Dicas de uso
+
+===================================
+🎨 RECURSOS:
+===================================
+
+✅ Sistema de Login (Admin/Frentista)
+✅ Gerenciamento de Bombas
+✅ CRUD Completo
+✅ API REST + Swagger
+✅ Interface Gráfica Moderna
+
+===================================
+
+Bom uso! 🚀
+
