@@ -48,10 +48,10 @@ CREATE DATABASE pdv_posto;
 
 3. **IMPORTANTE:** Altere a senha do PostgreSQL na linha:
    ```properties
-   spring.datasource.password=Sidney123@
+   spring.datasource.password=12345
    ```
    
-   Troque `Sidney123@` pela **SUA senha do PostgreSQL**
+   Troque `12345` pela **SUA senha do PostgreSQL**
    
    Exemplo:
    ```properties
@@ -78,7 +78,7 @@ CREATE DATABASE pdv_posto;
 
 4. **Aguarde** aparecer a mensagem:
    ```
-   Tomcat started on port 8081
+   Tomcat started on port 8080
    ```
 
 5. ✅ **Deixe esta janela aberta!** O backend precisa ficar rodando.

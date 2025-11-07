@@ -19,7 +19,7 @@ Use este procedimento quando:
 **Execute na pasta do frontend:**
 
 ```bash
-cd C:\Users\sidney\Documents\Projetos\pdvcombustivel3\frontend
+cd C:\Users\Documents\Projetos\pdvcombustivel3\frontend
 del admin_config.properties
 del user_config.properties
 ```
@@ -48,13 +48,13 @@ ALTER SEQUENCE pessoas_id_seq RESTART WITH 1;
 
 **Backend:**
 ```bash
-cd C:\Users\sidney\Documents\Projetos\pdvcombustivel3\backend
+cd C:\Users\Documents\Projetos\pdvcombustivel3\backend
 mvn spring-boot:run
 ```
 
 **Frontend (novo terminal):**
 ```bash
-cd C:\Users\sidney\Documents\Projetos\pdvcombustivel3\frontend
+cd C:\Users\Documents\Projetos\pdvcombustivel3\frontend
 mvn clean compile exec:java
 ```
 

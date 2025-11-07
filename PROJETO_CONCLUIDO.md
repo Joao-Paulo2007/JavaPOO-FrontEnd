@@ -7,7 +7,7 @@
 ## 📁 Estrutura Criada
 
 ```
-C:\Users\sidney\Documents\Projetos\pdvcombustivel3\
+C:\Users\Documents\Projetos\pdvcombustivel3\
 ├── backend/               # API REST Spring Boot
 │   ├── src/
 │   ├── pom.xml
@@ -72,12 +72,12 @@ C:\Users\sidney\Documents\Projetos\pdvcombustivel3\
 ### Opção 1: Copiar Pasta
 ```powershell
 # Compactar a pasta
-Compress-Archive -Path "C:\Users\sidney\Documents\Projetos\pdvcombustivel3" -DestinationPath "C:\Users\sidney\Documents\pdvcombustivel3.zip"
+Compress-Archive -Path "C:\Users\Documents\Projetos\pdvcombustivel3" -DestinationPath "C:\Users\Documents\pdvcombustivel3.zip"
 ```
 
 ### Opção 2: GitHub (Recomendado)
 ```bash
-cd C:\Users\sidney\Documents\Projetos\pdvcombustivel3
+cd C:\Users\Documents\Projetos\pdvcombustivel3
 git init
 git add .
 git commit -m "Projeto PDV completo - Backend e Frontend"
@@ -172,5 +172,5 @@ Se seu amigo tiver dúvidas:
 **PROJETO CONCLUÍDO COM SUCESSO! 🎉**
 
 Data: 06/11/2025
-Local: C:\Users\sidney\Documents\Projetos\pdvcombustivel3
+Local: C:\Users\Documents\Projetos\pdvcombustivel3
 

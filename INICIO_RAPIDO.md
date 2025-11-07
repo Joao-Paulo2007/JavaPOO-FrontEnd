@@ -25,13 +25,13 @@ Criei um projeto completo PDV para seu amigo com:
 
 ### 1️⃣ Backend
 ```bash
-cd C:\Users\sidney\Documents\Projetos\pdvcombustivel3\backend
+cd C:\Users\Documents\Projetos\pdvcombustivel3\backend
 mvn spring-boot:run
 ```
 
 ### 2️⃣ Frontend
 ```bash
-cd C:\Users\sidney\Documents\Projetos\pdvcombustivel3\frontend
+cd C:\Users\Documents\Projetos\pdvcombustivel3\frontend
 mvn clean compile exec:java
 ```
 

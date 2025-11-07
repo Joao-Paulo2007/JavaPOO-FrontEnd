@@ -74,7 +74,7 @@ Este projeto usa um banco de dados **DIFERENTE** para evitar conflitos:
 
 2. O arquivo `application.properties` já está configurado com:
    - **Banco:** `pdv_posto`
-   - **Porta:** `8081`
+   - **Porta:** `8080`
    - **Senha:** `postgres` (altere se necessário)
 
 3. Se precisar alterar a senha, edite `backend/src/main/resources/application.properties`:
@@ -87,7 +87,7 @@ Este projeto usa um banco de dados **DIFERENTE** para evitar conflitos:
    mvn spring-boot:run
    ```
 
-   O backend estará rodando em: `http://localhost:8081`
+   O backend estará rodando em: `http://localhost:8080`
 
 5. Acesse a documentação Swagger:
    ```
