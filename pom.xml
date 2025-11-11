@@ -94,12 +94,6 @@
 
     </dependencies>
 
-
-    <modules>
-        <module>pdvbackend</module>
-        <module>pdvfrontend</module>
-    </modules>
-
     <build>
         <plugins>
 
